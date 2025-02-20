@@ -1,42 +1,76 @@
-name: CI
+name: CI - Build, Test, and Docker Build Check
 
 on:
   push:
     branches:
       - main
   pull_request:
-
-permissions:
-  actions: read
-  contents: read
+    branches:
+      - main
 
 jobs:
-  main:
+  gen-com-services-ci:
+    name: gen-com-services - Build, Test & Docker Check
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          fetch-depth: 0
-      
-      
+          python-version: '3.11'
 
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
+      - name: Install gen-com-services Dependencies
+        run: |
+          cd gen-com-services
+          pip install --no-cache-dir -r requirements.txt
 
-      
-      # Cache node_modules
-      - uses: actions/setup-node@v4
+      - name: Run gen-com-services Tests
+        run: |
+          cd gen-com-services
+          pytest --disable-warnings
+
+      - name: Docker Build gen-com-services
+        run: |
+          cd gen-com-services
+          docker build -t gen-com-services:latest .
+
+  gen-com-ui-ci:
+    name: gen-com-ui - Build, Test & Docker Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
-          cache: 'npm'
-       
-      - run: npm ci --legacy-peer-deps
-      - uses: nrwl/nx-set-shas@v4
+          node-version: 18
 
-      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-      # - run: npx nx-cloud record -- echo Hello World
-      # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
-      - run: npx nx affected -t lint test build
+      - name: Install gen-com-ui Dependencies
+        run: |
+          cd gen-com-ui
+          npm install
+
+      - name: Run Linter
+        run: |
+          cd gen-com-ui
+          npm run lint
+
+      - name: Run gen-com-ui Tests
+        run: |
+          cd gen-com-ui
+          npm test
+
+      - name: Build gen-com-ui
+        run: |
+          cd gen-com-ui
+          npm run build
+
+      - name: Docker Build gen-com-ui
+        run: |
+          cd gen-com-ui
+          docker build -t gen-com-ui:latest .

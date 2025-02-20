@@ -1,0 +1,56 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+
+env:
+  AWS_REGION: us-east-1  # Change to your AWS region
+  ECR_REPO_BACKEND: gen-com-services
+  ECR_REPO_FRONTEND: gen-com-ui
+  ECS_CLUSTER: gen-com-cluster
+  ECS_SERVICE_BACKEND: gen-com-services
+  ECS_SERVICE_FRONTEND: gen-com-ui
+  ECS_TASK_DEFINITION_BACKEND: gen-com-services-task-def.json
+  ECS_TASK_DEFINITION_FRONTEND: gen-com-ui-task-def.json
+
+jobs:
+  deploy:
+    name: Deploy to AWS ECS
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to AWS ECR
+      run: |
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+    - name: Build and Push Backend Docker Image
+      run: |
+        docker build -t $ECR_REPO_BACKEND ./gen-com-services
+        docker tag $ECR_REPO_BACKEND:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_BACKEND:latest
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_BACKEND:latest
+
+    - name: Build and Push Frontend Docker Image
+      run: |
+        docker build -t $ECR_REPO_FRONTEND ./gen-com-ui
+        docker tag $ECR_REPO_FRONTEND:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_FRONTEND:latest
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_FRONTEND:latest
+
+    - name: Deploy Backend Service to ECS
+      run: |
+        aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE_BACKEND --force-new-deployment
+
+    - name: Deploy Frontend Service to ECS
+      run: |
+        aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE_FRONTEND --force-new-deployment

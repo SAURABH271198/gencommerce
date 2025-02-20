@@ -1,0 +1,18 @@
+{
+    "name": "gen-com-services",
+    "targets": {
+      "serve": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "uvicorn gen-com-services.main:app --host 0.0.0.0 --port 8000 --reload"
+        }
+      },
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "echo 'FastAPI does not require a build step'"
+        }
+      }
+    }
+  }
+  
