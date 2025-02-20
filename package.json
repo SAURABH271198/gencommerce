@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nx run-many --target=serve --projects=gen-com-ui,gen-com-services --parallel",
-    "build": "nx run-many --target=build --projects=gen-com-ui,gen-com-services --parallel" 
+    "build": "nx run-many --target=build --projects=gen-com-ui,gen-com-services --parallel"
   },
   "private": true,
   "devDependencies": {
@@ -37,7 +37,7 @@
     "@types/react-dom": "19.0.0",
     "babel-jest": "^29.7.0",
     "core-js": "^3.36.1",
-    "eslint": "^9.8.0",
+    "eslint": "^8.57.1",
     "eslint-config-next": "14.2.16",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "2.31.0",
