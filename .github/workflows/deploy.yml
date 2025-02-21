@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: '3.9'
 
       - name: Install dependencies
         run: |
@@ -31,14 +31,14 @@ jobs:
           pip install flake8
           flake8 . --exclude=venv,__pycache__ --max-line-length=88
 
-      # - name: Run Tests
-      #   run: |
-      #     cd gen-com-services
-      #     pip install pytest
-      #     pytest
+      - name: Run Tests
+        run: |
+          cd gen-com-services
+          pip install pytest
+          pytest
 
   test-lint-build-gen-com-ui:
-    name: Test & Lint gen-com-ui 
+    name: Test & Lint gen-com-ui
     runs-on: ubuntu-latest
 
     steps:
@@ -48,17 +48,17 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
 
       - name: Install dependencies
         run: |
           cd gen-com-ui
           npm install --legacy-peer-deps
 
-      # - name: Lint with ESLint
-      #   run: |
-      #     cd gen-com-ui
-      #     npm run lint
+      - name: Lint with ESLint
+        run: |
+          cd gen-com-ui
+          npm run lint
 
       - name: Run Tests
         run: |
