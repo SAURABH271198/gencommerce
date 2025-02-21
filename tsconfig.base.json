@@ -23,7 +23,8 @@
       "@gencommerce/types/server": ["libs/types/src/server.ts"],
       "@gencommerce/utils": ["libs/utils/src/index.ts"],
       "@gencommerce/utils/server": ["libs/utils/src/server.ts"]
-    }
+    },
+    "jsx": "react-jsx"
   },
   "exclude": ["node_modules", "tmp"]
 }
