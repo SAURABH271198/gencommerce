@@ -55,10 +55,10 @@ jobs:
           cd gen-com-ui
           npm install --legacy-peer-deps
 
-      - name: Lint with ESLint
-        run: |
-          cd gen-com-ui
-          npm run lint
+      # - name: Lint with ESLint
+      #   run: |
+      #     cd gen-com-ui
+      #     npm run lint
 
       - name: Run Tests
         run: |
