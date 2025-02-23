@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nx run-many --target=serve --projects=gen-com-ui,gen-com-services --parallel",
-    "build": "nx run-many --target=build --projects=gen-com-ui,gen-com-services --parallel",
+    "build": "nx run-many --target=build --projects=gen-com-ui,gen-com-services --parallel --skip-nx-cache",
     "lint": "nx lint gen-com-ui --fix --skip-nx-cache",
     "test": "nx test gen-com-ui --skip-nx-cache"
   },
