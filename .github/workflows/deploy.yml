@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd gen-com-ui
-          npm install --legacy-peer-deps
+          npm install
 
       - name: Lint with ESLint
         run: |
