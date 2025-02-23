@@ -58,7 +58,7 @@ jobs:
       - name: Lint with ESLint
         run: |
           cd gen-com-ui
-          npm run lint
+          npm run lint --skip-nx-cache
 
       - name: Run Tests
         run: |
