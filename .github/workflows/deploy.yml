@@ -20,7 +20,7 @@ jobs:
       - name: Build Docker Images
         run: |
           docker build -t gen-com-services ./gen-com-services
-          docker build -t gen-com-ui ./gen-com-ui
+           docker build -t gen-com-ui -f gen-com-ui/Dockerfile .
 
       - name: Run Docker Containers
         run: |
