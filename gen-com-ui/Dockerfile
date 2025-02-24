@@ -3,14 +3,17 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY ../../package.json ../../package-lock.json ./
+# Copy monorepo-wide package files
+COPY package.json package-lock.json ./
+
+# Install dependencies from monorepo root
 RUN npm install
 
-# Copy app files
+# Copy the entire monorepo (so it includes shared libs)
 COPY . .
 
 # Build the Next.js app
+WORKDIR /app/apps/gen-com-ui
 RUN npm run build
 
 # Expose frontend port
