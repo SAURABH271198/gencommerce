@@ -19,8 +19,8 @@ jobs:
 
       - name: Build Docker Images
         run: |
-          docker build -t gen-com-services -f gen-com-services/Dockerfile .
-          docker build -t gen-com-ui -f gen-com-ui/Dockerfile .
+          docker build -t gen-com-services ./gen-com-services
+          docker build -t gen-com-ui ./gen-com-ui
 
       - name: Run Docker Containers
         run: |

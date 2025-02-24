@@ -4,7 +4,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy monorepo-wide package files
-COPY package.json package-lock.json ./
+COPY ../package.json ../package-lock.json ./
 
 # Install dependencies from monorepo root
 RUN npm install
