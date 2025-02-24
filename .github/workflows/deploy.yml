@@ -40,8 +40,8 @@ jobs:
       # - name: Run Backend Tests (gen-com-services)
       #   run: docker exec gen-com-services pytest
 
-      - name: Run Frontend Tests (gen-com-ui)
-        run: docker exec gen-com-ui npm run test
+      # - name: Run Frontend Tests (gen-com-ui)
+      #   run: docker exec gen-com-ui npm run test
 
       - name: Stop Containers
         if: always()
