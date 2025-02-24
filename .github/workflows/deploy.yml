@@ -1,4 +1,4 @@
-name: CI/CD Pipeline - GenCommerce
+name: CI/CD Pipeline - GenCommerce with Docker
 
 on:
   push:
@@ -6,68 +6,45 @@ on:
       - main
 
 jobs:
-  test-lint-build-gen-com-services:
-    name: Test, Lint & Build gen-com-services (Docker)
+  build-and-run-services:
+    name: Build & Run gen-com-services and gen-com-ui with Docker
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Build Docker Image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Images
         run: |
           docker build -t gen-com-services ./gen-com-services
-
-      - name: Run Lint and Tests in Docker
-        run: |
-          docker run --rm gen-com-services bash -c "flake8 . --exclude=venv,__pycache__ --max-line-length=88"
-          # Uncomment below to enable tests
-          # docker run --rm gen-com-services bash -c "pytest"
-
-  test-lint-build-gen-com-ui:
-    name: Test, Lint & Build gen-com-ui (Docker)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Build Docker Image
-        run: |
           docker build -t gen-com-ui ./gen-com-ui
 
-      - name: Run Lint, Tests, and Build in Docker
+      - name: Run Docker Containers
         run: |
-          docker run --rm gen-com-ui bash -c "npm run lint"
-          docker run --rm gen-com-ui bash -c "npm run test"
-          # docker run --rm gen-com-ui bash -c "npm run build"
+          docker network create gencommerce-network
 
-  # deploy-gen-com-services:
-  #   name: Deploy gen-com-services (Docker)
-  #   runs-on: ubuntu-latest
-  #   needs: test-lint-build-gen-com-services
-  #
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #
-  #     - name: Push Docker Image to AWS ECR
-  #       run: |
-  #         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-  #         docker tag gen-com-services:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/gen-com-services:latest
-  #         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/gen-com-services:latest
-  #
-  # deploy-gen-com-ui:
-  #   name: Deploy gen-com-ui (Docker)
-  #   runs-on: ubuntu-latest
-  #   needs: [test-lint-build-gen-com-ui, deploy-gen-com-services]
-  #
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #
-  #     - name: Push Docker Image to AWS ECR
-  #       run: |
-  #         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-  #         docker tag gen-com-ui:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/gen-com-ui:latest
-  #         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/gen-com-ui:latest
+          docker run -d --name gen-com-services \
+            --network gencommerce-network \
+            -p 8000:8000 gen-com-services
+
+          docker run -d --name gen-com-ui \
+            --network gencommerce-network \
+            -p 3000:3000 gen-com-ui
+
+      - name: Check Running Containers
+        run: docker ps
+
+      - name: Run Backend Tests (gen-com-services)
+        run: docker exec gen-com-services pytest
+
+      - name: Run Frontend Tests (gen-com-ui)
+        run: docker exec gen-com-ui npm run test
+
+      - name: Stop Containers
+        if: always()
+        run: |
+          docker stop gen-com-services gen-com-ui
+          docker rm gen-com-services gen-com-ui

@@ -1,20 +1,17 @@
-# Use official Python image as base
-FROM python:3.11
+FROM python:3.9-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy dependencies file
+# Copy requirements and install
 COPY requirements.txt .
-
-# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the app
+# Copy the service code
 COPY . .
 
-# Expose the FastAPI default port
+# Expose the service port
 EXPOSE 8000
 
-# Run FastAPI application
+# Command to run the FastAPI app
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
