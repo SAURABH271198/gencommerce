@@ -7,138 +7,67 @@ on:
 
 jobs:
   test-lint-build-gen-com-services:
-    name: Test & Lint gen-com-services (gen-com-services)
+    name: Test, Lint & Build gen-com-services (Docker)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
+      - name: Build Docker Image
         run: |
-          cd gen-com-services
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          docker build -t gen-com-services ./gen-com-services
 
-      - name: Lint with Flake8
+      - name: Run Lint and Tests in Docker
         run: |
-          cd gen-com-services
-          pip install flake8
-          flake8 . --exclude=venv,__pycache__ --max-line-length=88
-
-      # - name: Run Tests
-      #   run: |
-      #     cd gen-com-services
-      #     pip install pytest
-      #     pytest
+          docker run --rm gen-com-services bash -c "flake8 . --exclude=venv,__pycache__ --max-line-length=88"
+          # Uncomment below to enable tests
+          # docker run --rm gen-com-services bash -c "pytest"
 
   test-lint-build-gen-com-ui:
-    name: Test & Lint gen-com-ui
+    name: Test, Lint & Build gen-com-ui (Docker)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Clear npm cache
-        run: npm cache clean --force
-
-      - name: Install dependencies
+      - name: Build Docker Image
         run: |
-          cd gen-com-ui
-          npm install
+          docker build -t gen-com-ui ./gen-com-ui
 
-      - name: Lint with ESLint
+      - name: Run Lint, Tests, and Build in Docker
         run: |
-          cd gen-com-ui
-          npm run lint
-
-      - name: Run Tests
-        run: |
-          cd gen-com-ui
-          npm run test
-
-      - name: Build Project
-        run: |
-          cd gen-com-ui
-          npm run build
+          docker run --rm gen-com-ui bash -c "npm run lint"
+          docker run --rm gen-com-ui bash -c "npm run test"
+          # docker run --rm gen-com-ui bash -c "npm run build"
 
   # deploy-gen-com-services:
-  #   name: Deploy gen-com-services (gen-com-services)
+  #   name: Deploy gen-com-services (Docker)
   #   runs-on: ubuntu-latest
   #   needs: test-lint-build-gen-com-services
-
+  #
   #   steps:
   #     - name: Checkout repository
   #       uses: actions/checkout@v3
-
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: "3.9"
-
-  #     - name: Install dependencies
+  #
+  #     - name: Push Docker Image to AWS ECR
   #       run: |
-  #         cd gen-com-services
-  #         python -m pip install --upgrade pip
-  #         pip install -r requirements.txt
-
-  #     - name: Package FastAPI app
-  #       run: |
-  #         cd gen-com-services
-  #         zip -r deploy.zip . -x "*.git*"
-
-  #     - name: Deploy to AWS Lambda
-  #       uses: aws-actions/aws-lambda-deploy@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ secrets.AWS_REGION }}
-  #         function-name: "gen-com-services"
-  #         zip-file: "gen-com-services/deploy.zip"
-
+  #         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  #         docker tag gen-com-services:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/gen-com-services:latest
+  #         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/gen-com-services:latest
+  #
   # deploy-gen-com-ui:
-  #   name: Deploy gen-com-ui (gen-com-ui)
+  #   name: Deploy gen-com-ui (Docker)
   #   runs-on: ubuntu-latest
   #   needs: [test-lint-build-gen-com-ui, deploy-gen-com-services]
-
+  #
   #   steps:
   #     - name: Checkout repository
   #       uses: actions/checkout@v3
-
-  #     - name: Install Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: "18"
-
-  #     - name: Install dependencies
+  #
+  #     - name: Push Docker Image to AWS ECR
   #       run: |
-  #         cd gen-com-ui
-  #         npm install
-
-  #     - name: Build Next.js app
-  #       run: |
-  #         cd gen-com-ui
-  #         npm run build && npm run export
-
-  #     - name: Deploy to S3
-  #       run: |
-  #         aws s3 sync gen-com-ui/out s3://your-bucket-name --delete
-  #       env:
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         AWS_REGION: ${{ secrets.AWS_REGION }}
-
-  #     - name: Invalidate CloudFront cache
-  #       run: |
-  #         aws cloudfront create-invalidation --distribution-i
+  #         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  #         docker tag gen-com-ui:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/gen-com-ui:latest
+  #         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/gen-com-ui:latest
