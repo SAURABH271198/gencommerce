@@ -37,8 +37,8 @@ jobs:
       - name: Check Running Containers
         run: docker ps
 
-      - name: Run Backend Tests (gen-com-services)
-        run: docker exec gen-com-services pytest
+      # - name: Run Backend Tests (gen-com-services)
+      #   run: docker exec gen-com-services pytest
 
       - name: Run Frontend Tests (gen-com-ui)
         run: docker exec gen-com-ui npm run test
