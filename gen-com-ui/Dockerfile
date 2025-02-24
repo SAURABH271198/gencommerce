@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install dependencies from monorepo root
-RUN npm install
+RUN rm -rf node_modules && npm cache clean --force && npm install
 
 # Copy the entire monorepo (so it includes shared libs)
 COPY . .
