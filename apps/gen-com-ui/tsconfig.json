@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "preserve",
     "strict": true,
@@ -34,8 +34,8 @@
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx",
-    "../dist/gen-com-ui/.next/types/**/*.ts",
-    "../gen-com-ui/.next/types/**/*.ts",
+    "../../apps/gen-com-ui/.next/types/**/*.ts",
+    "../../dist/apps/gen-com-ui/.next/types/**/*.ts",
     "next-env.d.ts",
     ".next/types/**/*.ts"
   ],
