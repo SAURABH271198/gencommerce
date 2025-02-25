@@ -44,3 +44,19 @@ Thumbs.db
 # Next.js
 .next
 out
+
+#python
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore system files
+*.log
+
+# Ignore installed package changes
+*.egg-info/
