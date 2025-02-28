@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "nx run-many --target=serve --projects=gen-com-ui,gen-com-services --parallel",
+    "start": "nx run-many --target=serve --projects=gen-com-ui,gen-com-services --parallel",
     "build": "nx build gen-com-ui --skip-nx-cache",
     "lint": "nx lint gen-com-ui --fix --skip-nx-cache",
     "test": "nx test gen-com-ui --skip-nx-cache"
