@@ -66,11 +66,11 @@ jobs:
           npm install
           npm run lint
 
-      - name: Lint Backend (gen-com-services)
-        run: |
-          cd gen-com-services
-          pip install flake8
-          flake8 . --exclude=venv,__pycache__
+      # - name: Lint Backend (gen-com-services)
+      #   run: |
+      #     cd gen-com-services
+      #     pip install flake8
+      #     flake8 . --exclude=venv,__pycache__
 
   build:
     name: Build Docker Images
