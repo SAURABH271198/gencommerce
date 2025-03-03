@@ -27,6 +27,7 @@ jobs:
 
       - name: Build & Run Containers for Testing
         run: |
+          echo ${{ secrets.AWS_ACCESS_KEY_ID }}
           docker network create gencommerce-network
           docker build -t gen-com-services ./gen-com-services
           docker build -t gen-com-ui -f apps/gen-com-ui/Dockerfile .
@@ -106,14 +107,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Print and Execute AWS ECR Login Command
-        run: |
-          echo "Running AWS ECR Login Command:"
-          echo "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"
-
       - name: Login to AWS ECR
         run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login ${{ secrets.AWS_ACCESS_KEY_ID }} AWS ${{ secrets.AWS_SECRET_ACCESS_KEY }} $ECR_REGISTRY
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
 
       - name: Tag and Push Images to AWS ECR
         run: |
