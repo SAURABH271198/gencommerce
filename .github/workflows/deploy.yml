@@ -14,6 +14,64 @@ env:
   ECR_REPOSITORY_SERVICES: gen-com-services
 
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & Run Containers for Testing
+        run: |
+          docker network create gencommerce-network
+          docker build -t gen-com-services ./gen-com-services
+          docker build -t gen-com-ui -f apps/gen-com-ui/Dockerfile .
+
+          docker run -d --name gen-com-services \
+            --network gencommerce-network \
+            -p 8000:8000 gen-com-services
+
+          docker run -d --name gen-com-ui \
+            --network gencommerce-network \
+            -p 3000:3000 gen-com-ui
+
+      - name: Run Frontend Tests (gen-com-ui)
+        run: docker exec gen-com-ui npm run test
+
+      # - name: Run Backend Tests (gen-com-services)
+      #   run: docker exec gen-com-services pytest
+
+      - name: Stop & Remove Containers
+        if: always()
+        run: |
+          docker stop gen-com-services gen-com-ui
+          docker rm gen-com-services gen-com-ui
+          docker network rm gencommerce-network
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Lint Frontend (gen-com-ui)
+        run: |
+          cd apps/gen-com-ui
+          npm install
+          npm run lint
+
+      # - name: Lint Backend (gen-com-services)
+      #   run: |
+      #     cd gen-com-services
+      #     pip install flake8
+      #     flake8 . --exclude=venv,__pycache__
+
   build:
     name: Build Docker Images
     runs-on: ubuntu-latest
@@ -30,38 +88,6 @@ jobs:
         run: |
           docker build -t gen-com-services ./gen-com-services
           docker build -t gen-com-ui -f apps/gen-com-ui/Dockerfile .
-
-  lint:
-    name: Lint Code
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Lint Frontend (gen-com-ui)
-        run: |
-          cd apps/gen-com-ui
-          npm run lint
-
-      # - name: Lint Backend (gen-com-services)
-      #   run: |
-      #     cd gen-com-services
-      #     pip install flake8
-      #     flake8 . --exclude=venv,__pycache__
-
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Run Frontend Tests (gen-com-ui)
-        run: |
-          cd apps/gen-com-ui
-          npm run test
-
-      # - name: Run Backend Tests (gen-com-services)
-      #   run: docker exec gen-com-services pytest
 
   push-to-ecr:
     name: Push Images to AWS ECR
@@ -80,9 +106,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Print and Execute AWS ECR Login Command
+        run: |
+          echo "Running AWS ECR Login Command:"
+          echo "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"
+
       - name: Login to AWS ECR
         run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+          aws ecr get-login-password --region $AWS_REGION | docker login ${{ secrets.AWS_ACCESS_KEY_ID }} AWS ${{ secrets.AWS_SECRET_ACCESS_KEY }} $ECR_REGISTRY
 
       - name: Tag and Push Images to AWS ECR
         run: |
