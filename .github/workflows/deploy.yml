@@ -14,19 +14,6 @@ env:
   ECR_REPOSITORY_SERVICES: gen-com-services
 
 jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Run Frontend Tests (gen-com-ui)
-        run: |
-          cd apps/gen-com-ui
-          npm run test
-
-      # - name: Run Backend Tests (gen-com-services)
-      #   run: docker exec gen-com-services pytest
-
   build:
     name: Build Docker Images
     runs-on: ubuntu-latest
@@ -62,6 +49,19 @@ jobs:
       #     cd gen-com-services
       #     pip install flake8
       #     flake8 . --exclude=venv,__pycache__
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run Frontend Tests (gen-com-ui)
+        run: |
+          cd apps/gen-com-ui
+          npm run test
+
+      # - name: Run Backend Tests (gen-com-services)
+      #   run: docker exec gen-com-services pytest
 
   push-to-ecr:
     name: Push Images to AWS ECR
