@@ -12,6 +12,7 @@ env:
   ECR_REGISTRY: 008971655305.dkr.ecr.us-east-1.amazonaws.com
   ECR_REPOSITORY_UI: gen-com-ui
   ECR_REPOSITORY_SERVICES: gen-com-services
+  ECR_REPOSITORY_AI: gen-com-ai
 
 jobs:
   test:
@@ -30,6 +31,7 @@ jobs:
           docker network create gencommerce-network
           docker build -t gen-com-services ./gen-com-services
           docker build -t gen-com-ui -f apps/gen-com-ui/Dockerfile .
+          docker build -t gen-com-ai ./apps/gen-com-ai
 
           docker run -d --name gen-com-services \
             --network gencommerce-network \
@@ -39,17 +41,18 @@ jobs:
             --network gencommerce-network \
             -p 3000:3000 gen-com-ui
 
+          docker run -d --name gen-com-ai \
+            --network gencommerce-network \
+            -p 5000:5000 gen-com-ai
+
       - name: Run Frontend Tests (gen-com-ui)
         run: docker exec gen-com-ui npm run test
-
-      # - name: Run Backend Tests (gen-com-services)
-      #   run: docker exec gen-com-services pytest
 
       - name: Stop & Remove Containers
         if: always()
         run: |
-          docker stop gen-com-services gen-com-ui
-          docker rm gen-com-services gen-com-ui
+          docker stop gen-com-services gen-com-ui gen-com-ai
+          docker rm gen-com-services gen-com-ui gen-com-ai
           docker network rm gencommerce-network
 
   lint:
@@ -65,12 +68,6 @@ jobs:
           cd apps/gen-com-ui
           npm install
           npm run lint
-
-      # - name: Lint Backend (gen-com-services)
-      #   run: |
-      #     cd gen-com-services
-      #     pip install flake8
-      #     flake8 . --exclude=venv,__pycache__
 
   build:
     name: Build Docker Images
@@ -88,6 +85,7 @@ jobs:
         run: |
           docker build -t gen-com-services ./gen-com-services
           docker build -t gen-com-ui -f apps/gen-com-ui/Dockerfile .
+          docker build -t gen-com-ai ./apps/gen-com-ai
 
   push-to-ecr:
     name: Push Images to AWS ECR
@@ -106,19 +104,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Print and Execute AWS ECR Login Command
-        run: |
-          echo "Running AWS ECR Login Command:"
-          echo "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"
-
       - name: Login to AWS ECR
         run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login ${{ secrets.AWS_ACCESS_KEY_ID }} AWS ${{ secrets.AWS_SECRET_ACCESS_KEY }} $ECR_REGISTRY
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
 
       - name: Tag and Push Images to AWS ECR
         run: |
           docker tag gen-com-services:latest $ECR_REGISTRY/$ECR_REPOSITORY_SERVICES:latest
           docker tag gen-com-ui:latest $ECR_REGISTRY/$ECR_REPOSITORY_UI:latest
+          docker tag gen-com-ai:latest $ECR_REGISTRY/$ECR_REPOSITORY_AI:latest
 
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_SERVICES:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY_UI:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_AI:latest

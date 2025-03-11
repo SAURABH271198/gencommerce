@@ -1,0 +1,20 @@
+# FastAPI for API framework
+fastapi
+uvicorn
+
+# AI & Machine Learning Libraries
+torch
+transformers
+torchvision
+
+# Image Processing
+pillow
+numpy
+opencv-python
+
+# Speech Processing (for voice search)
+openai-whisper
+
+# Miscellaneous Utilities
+scipy
+pydantic
