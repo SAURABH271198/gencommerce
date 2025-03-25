@@ -13,13 +13,11 @@ env:
   ECR_REPOSITORY_UI: gen-com-ui
   ECR_REPOSITORY_SERVICES: gen-com-services
   ECR_REPOSITORY_AI: gen-com-ai
-  open_ai_key: ${{ secrets.open_ai_key }}
 
 jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
