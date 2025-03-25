@@ -6,6 +6,7 @@ uvicorn
 torch
 transformers
 torchvision
+openai
 
 # Image Processing
 pillow
@@ -18,3 +19,4 @@ openai-whisper
 # Miscellaneous Utilities
 scipy
 pydantic
+pydantic-settings

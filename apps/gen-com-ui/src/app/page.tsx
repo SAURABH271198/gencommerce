@@ -1,3 +1,5 @@
+'use-client';
+
 import styles from './page.module.scss';
 
 export default function Index() {
@@ -18,7 +20,7 @@ export default function Index() {
           </div>
 
           <div id="hero" className="rounded">
-            <div className="text-container">
+            <div className="text-container" data-testid="text-container">
               <h2>
                 <svg
                   fill="none"

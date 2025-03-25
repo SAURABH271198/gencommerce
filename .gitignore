@@ -60,3 +60,6 @@ __pycache__/
 
 # Ignore installed package changes
 *.egg-info/
+
+# environment file
+*.env
